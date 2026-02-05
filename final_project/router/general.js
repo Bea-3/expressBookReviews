@@ -74,21 +74,28 @@ public_users.get('/isbn/:isbn', async function (req, res) {
 // Get book details based on author
 public_users.get('/author/:author',function (req, res) {
   //Write your code here
-  const author = req.params.author.toLowerCase();
-  let result = [];
+  const author = req.params.author.toLowerCase(); // make search case-insensitive
 
-  // Get all keys (ISBNs) from books object
-  Object.keys(books).forEach((key) => {
-    if (books[key].author.toLowerCase() === author) {
-      result.push(books[key]);
-    }
-  });
+    // Create a Promise to simulate async book retrieval
+    let getBooksByAuthor = new Promise((resolve, reject) => {
+        const allBooks = Object.values(books); // array of book objects
+        const filteredBooks = allBooks.filter(book => book.author.toLowerCase() === author);
 
-  if (result.length > 0) {
-    return res.status(200).json(result);
-  } else {
-    return res.status(404).json({ message: "No books found for this author" });
-  }
+        if (filteredBooks.length > 0) {
+            resolve(filteredBooks);
+        } else {
+            reject("No books found with this author");
+        }
+    });
+
+    // Handle promise
+    getBooksByAuthor
+        .then((booksData) => {
+            res.status(200).send(JSON.stringify(booksData, null, 4));
+        })
+        .catch((error) => {
+            res.status(404).json({ message: error });
+        });
 });
 
 // Get all books based on title
