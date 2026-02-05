@@ -100,21 +100,28 @@ public_users.get('/author/:author',function (req, res) {
 
 // Get all books based on title
 public_users.get('/title/:title',function (req, res) {
-    const title = req.params.title.toLowerCase();
-    let result = [];
-  
-    // Iterate through all books
-    Object.keys(books).forEach((key) => {
-      if (books[key].title.toLowerCase() === title) {
-        result.push(books[key]);
-      }
+    const title = req.params.title.toLowerCase(); // case-insensitive search
+
+    // Create a promise to simulate async retrieval
+    let getBooksByTitle = new Promise((resolve, reject) => {
+        const allBooks = Object.values(books); // array of book objects
+        const filteredBooks = allBooks.filter(book => book.title.toLowerCase() === title);
+
+        if (filteredBooks.length > 0) {
+            resolve(filteredBooks);
+        } else {
+            reject("No books found with this title");
+        }
     });
-  
-    if (result.length > 0) {
-      return res.status(200).json(result);
-    } else {
-      return res.status(404).json({ message: "No books found with this title" });
-    }
+
+    // Handle the promise
+    getBooksByTitle
+        .then((booksData) => {
+            res.status(200).send(JSON.stringify(booksData, null, 4));
+        })
+        .catch((error) => {
+            res.status(404).json({ message: error });
+        });
 });
 
 //  Get book review
