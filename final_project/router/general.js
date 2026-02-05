@@ -33,7 +33,23 @@ public_users.post("/register", (req,res) => {
 
 // Get the book list available in the shop
 public_users.get('/',function (req, res) {
-  return res.status(200).send(JSON.stringify(books, null, 4));
+  // Create a promise to simulate async retrieval
+  let getBooksPromise = new Promise((resolve, reject) => {
+    if (books) {
+        resolve(books); // resolve with the books object
+    } else {
+        reject("No books available");
+    }
+});
+
+// Use then/catch callbacks
+getBooksPromise
+    .then((booksData) => {
+        res.status(200).send(JSON.stringify(booksData, null, 4));
+    })
+    .catch((error) => {
+        res.status(500).json({ message: error });
+    });
 });
 
 // Get book details based on ISBN
